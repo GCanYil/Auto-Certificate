@@ -1,5 +1,9 @@
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
+import os
+
+if not os.path.exists("output"):
+    os.makedirs("output")
 
 df = pd.read_excel("data/veri.xlsx")
 df["Tarih"] = df["Tarih"].dt.strftime("%d.%m.%Y")
