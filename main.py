@@ -7,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import time
+import qr_maker
 
 sender_mail = mailInfo.mail
 sender_pass = mailInfo.password
@@ -81,6 +82,10 @@ for row in rows_to_list:
     draw.text((x_coord,600), name, font=name_font, fill=(0,0,0))
     draw.text((type_box_x,350), type_of, font=description_font, fill=(0,0,0))
     draw.text((date_box_x,1350), certificate_date, font=date_font, fill=(0,0,0))
+
+    qr_img = qr_maker.make_qr(name= name, date= certificate_date)
+    qr_img = qr_img.resize((150,150))
+    img.paste(qr_img, (1830,1240))
 
     img.save(f"output/{name}.png")
     send_mail(receiver_mail=email, receiver_name=name, certificate_path=f"output/{name}.png")
