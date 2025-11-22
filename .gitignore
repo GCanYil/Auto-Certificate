@@ -1,3 +1,4 @@
 output/
 __pycache__/
 data/veri.xlsx
+mailInfo.py

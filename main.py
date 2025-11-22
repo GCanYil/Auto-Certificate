@@ -1,6 +1,49 @@
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 import os
+import mailInfo
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+import time
+
+sender_mail = mailInfo.mail
+sender_pass = mailInfo.password
+
+def send_mail(receiver_mail, receiver_name, certificate_path):
+    fin = MIMEMultipart()
+    fin["From"] = sender_mail
+    fin["To"] = receiver_mail
+    fin["Subject"] = "Congratulations! Your certificate is ready!"
+
+    message_body = f"""Hey {receiver_name}!
+We congratulate you for completing your course.
+Your personal certificate is in the attachment.
+
+Wishing you a great career!"""
+    fin.attach(MIMEText(message_body, "plain"))
+
+    try:
+        with open(certificate_path, "rb") as certificate:
+            certificate_data = certificate.read()
+        image_attachment = MIMEImage(certificate_data, name = os.path.basename(certificate_path))
+        fin.attach(image_attachment)
+    except FileNotFoundError:
+        print(f"Error: {certificate_path} couldn't be found. No mail sent.")
+        return
+    
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_mail, sender_pass)
+        message = fin.as_string()
+        server.sendmail(sender_mail, receiver_mail, message)
+        print(f"Certificate sent to -> {receiver_mail}")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        server.quit()
 
 if not os.path.exists("output"):
     os.makedirs("output")
@@ -40,3 +83,5 @@ for row in rows_to_list:
     draw.text((date_box_x,1350), certificate_date, font=date_font, fill=(0,0,0))
 
     img.save(f"output/{name}.png")
+    send_mail(receiver_mail=email, receiver_name=name, certificate_path=f"output/{name}.png")
+    time.sleep(2)
